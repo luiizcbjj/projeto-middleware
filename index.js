@@ -4,28 +4,23 @@ const verificarAutorizacao = require('./auth');
 const app = express();
 const PORT = 3000;
 
-// Middleware global para parsing de JSON
 app.use(express.json());
 
-// Middleware global para registrar todas as chamadas
 app.use((req, res, next) => {
     console.log('Chamando API');
     next();
 });
 
-// Dados de exemplo para usuários
 const usuarios = [
     { id: 1, nome: 'João Silva', tipo: 'COMUM' },
     { id: 2, nome: 'Maria Santos', tipo: 'ADM' },
     { id: 3, nome: 'Pedro Costa', tipo: 'COMUM' }
 ];
 
-// Rota GET /usuarios (PÚBLICA)
 app.get('/usuarios', (req, res) => {
     res.json(usuarios);
 });
 
-// Rota POST /usuarios (PRIVADA - COM autenticação)
 app.post('/usuarios', verificarAutorizacao, (req, res) => {
     const novoUsuario = {
         id: usuarios.length + 1,
@@ -42,7 +37,14 @@ app.post('/usuarios', verificarAutorizacao, (req, res) => {
     });
 });
 
-// Iniciar servidor
+app.post('/', (req, res) => {
+    const { tipoUsuario } = req.body;
+    if (!tipoUsuario) {
+        return res.status(400).json({ mensagem: 'tipoUsuario é obrigatório' });
+    }
+    res.status(201).json({ mensagem: `Usuário do tipo ${tipoUsuario} recebido com sucesso!` });
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
